@@ -1,39 +1,65 @@
+namespace neurons 
+{
+	class synapse;
 
-namespace neurons{
-	
-	struct neuron{
-		float   value;
-		float	delta;
-		std::list<struct synapse *> synapses;
-		std::list<struct synapse *> prevSynapses;
-		int  id;
+	class neuron
+	{
+		public:
+			int id;
+			float value;
+			std::list<synapse *> synapses;
+			neuron();
+			//~neuron();	
 	};
-	struct synapse{
-		float   weight;
-		struct neuron * in;
-		struct neuron * out;
+
+	class synapse
+	{
+		public:
+			float weight;
+			neuron *in;
+			neuron *out;
+			synapse(neuron *in , neuron *out);
+			//~synapse();
+		
 	};
-	struct layer{
-		std::list<struct neuron *> neurons;
+	class layer
+	{
+		public:
+			std::list<neuron *> neurons;
+			layer();
+			//~layer();
 	};
-	struct net{
-		std::list<struct layer  *> layers;
+
+	class net
+	{
+		public:
+			std::vector<layer *> layers;
+			//std::vector<synapse *> synapses_heap;
+			net();
+			void calculate();
+			void feed();
+			//~net();
 	};
-	
-	struct layer * create_layer();
-	struct net *
-	 create_neural_network(struct neuron ** In , struct neuron ** Out );
-	
-	struct neuron   create_neuron();
-	struct synapse * create_synapse(struct neuron * neuIn ,
-	 struct neuron * neuOut );
-	void syn_connect(struct neuron * neuIn , struct neuron * neuOut);
-	void calculete(struct neuron **In);
-	float normate(float x);
-	float dlogistic(float x);
-	void optimize(struct neuron ** In , struct neuron ** Out , 
-	 int * is , int * os);
-	void RestValueDeltas(struct neuron ** In);
+
+
+	#define for_each_synapse_in_neuron(Neuron , iterator_synapse) \
+		for (std::list<synapse *> iterator_synapse = \
+		 Neuron->synapses::begin(); \
+			iterator_synapse != Neuron->synapses::end(); \
+			 ++iterator_synapse)
+
+	#define for_each_neuron_in_layer(Layer , iterator_neurons) \
+		for (std::list<neuron *> iterator_neurons = \
+		 Layer->neurons::begin(); \
+		 	iterator_neurons != Layer->neurons::end(); \
+		 	 ++iterator_neurons)
+
+	#define open_flow(Net , iterator_layers) \
+		for (std::vector<layer *>::iterator iterator_layers = \
+		 Net->layers::begin(); \
+			iterator_layers != Net->layers::end() ; \
+			 ++iterator_layers)
+
+
 
 };
-

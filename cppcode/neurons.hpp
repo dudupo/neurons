@@ -2,6 +2,7 @@ namespace neurons
 {
 	class synapse;
 
+
 	class neuron
 	{
 		public:
@@ -9,6 +10,8 @@ namespace neurons
 			float value;
 			std::list<synapse *> synapses;
 			neuron();
+			void normate();
+			// void virtual normate();
 			//~neuron();	
 	};
 
@@ -43,23 +46,27 @@ namespace neurons
 
 
 	#define for_each_synapse_in_neuron(Neuron , iterator_synapse) \
-		for (std::list<synapse *> iterator_synapse = \
-		 Neuron->synapses::begin(); \
-			iterator_synapse != Neuron->synapses::end(); \
+		for (std::list<synapse *>::iterator iterator_synapse = \
+		 Neuron->synapses.begin(); \
+			iterator_synapse != Neuron->synapses.end(); \
 			 ++iterator_synapse)
 
 	#define for_each_neuron_in_layer(Layer , iterator_neurons) \
-		for (std::list<neuron *> iterator_neurons = \
-		 Layer->neurons::begin(); \
-		 	iterator_neurons != Layer->neurons::end(); \
+		for (std::list<neuron *>::iterator iterator_neurons = \
+		 Layer->neurons.begin(); \
+		 	iterator_neurons != Layer->neurons.end(); \
 		 	 ++iterator_neurons)
 
 	#define open_flow(Net , iterator_layers) \
 		for (std::vector<layer *>::iterator iterator_layers = \
-		 Net->layers::begin(); \
-			iterator_layers != Net->layers::end() ; \
+		 Net->layers.begin(); \
+			iterator_layers != Net->layers.end() ; \
 			 ++iterator_layers)
 
-
+	void inline send_sign(synapse * synapse_ptr)
+	{
+		synapse_ptr->out->value +=
+		 synapse_ptr->weight * synapse_ptr->in->value;
+	}
 
 };

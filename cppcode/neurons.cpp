@@ -10,8 +10,13 @@ namespace neurons
 	neuron::neuron()
 	{
 		this->value = 0.5;
+		//this->synapses.resize(0);
 	}
 
+	void neuron::normate()
+	{
+		this->value = 1 /( 1 + exp(- this->value));
+	}
 	synapse::synapse(neuron * in , neuron * out)
 	{
 		this->in = in;
@@ -47,15 +52,32 @@ namespace neurons
 	}
 
 	void net::calculate()
-	{
-
+	{	
+		layer * layer_ptr;
+		neuron * neuron_ptr;
+		synapse * synapse_ptr;
+		open_flow(this , iterator_layer)
+		{
+			layer_ptr = *(iterator_layer);
+			for_each_neuron_in_layer(layer_ptr , iterator_neurons)
+			{
+				neuron_ptr = *(iterator_neurons);
+				neuron_ptr->normate();
+				for_each_synapse_in_neuron(neuron_ptr , iterator_synapses)
+				{
+					std::cout << "hi?" << std::endl;
+					synapse_ptr = *(iterator_synapses);
+					send_sign(synapse_ptr);
+				}
+				//std::cout << "hi?" << std::endl;
+			}
+		}
 	}
+
 
 	void net::feed()
 	{
 
 	}
-
-
 
 };

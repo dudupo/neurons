@@ -16,7 +16,6 @@ namespace neurons
 			// void virtual normate();
 			//~neuron();	
 	};
-
 	class synapse
 	{
 		public:
@@ -24,8 +23,8 @@ namespace neurons
 			neuron *in;
 			neuron *out;
 			synapse(neuron *in , neuron *out);
-			//~synapse();
-		
+			synapse(neuron *in , neuron *out , double weight);
+			//~synapse();	
 	};
 	class layer
 	{
@@ -34,12 +33,12 @@ namespace neurons
 			layer();
 			//~layer();
 	};
-
 	class net
 	{
 		public:
 			std::vector<layer *> layers;
 			//std::vector<synapse *> synapses_heap;
+			net(std::istream & is);
 			net();
 			void calculate_layer(layer * layer_ptr);
 			void calculate();
@@ -52,9 +51,13 @@ namespace neurons
 		 		std::vector<layer *>::iterator end , std::vector<double> * sample);
 			void backpropagation(std::vector<double> * sample_in , std::vector<double> * sample_out);
 			void clean();
+			void train(std::vector<double> *sample_in , std::vector<double> * sample_out);
+			net & operator<<( std::vector<double> * input);
+			net & operator>>( std::vector<double> * resoult);
 			//~net();
 	};
 
+	
 	#define for_each_synapse_in_neuron(Neuron , iterator_synapse) \
 		for (std::list<synapse *>::iterator iterator_synapse = \
 		 Neuron->synapses.begin(); \
@@ -80,4 +83,26 @@ namespace neurons
 	}
 
 	#define Rate -10
+
+	double costf(std::vector<double> * v , std::vector<double> * u);
+
+	class net_factory
+	{
+		public:
+			net_factory();
+			net_factory(std::istream & is);
+			net * Net;
+			void encode(std::istream & is);
+			void decode(std::ostream & os);
+			//~net_factory();
+		
+	};
+	class net_trainer
+	{
+		public:
+			net_trainer();
+			net_trainer(net * Net);
+			net * Net;
+	};
+
 };

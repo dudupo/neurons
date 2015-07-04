@@ -20,7 +20,7 @@ fi
 
 if [ "$1" == "makecpp" ]
 then
-g++ ./cppcode/main.cpp -o ./bin/maincpp.out
+g++ -std=c++11 ./cppcode/main.cpp -o ./bin/maincpp.out
 exit 1
 fi
 

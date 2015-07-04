@@ -23,12 +23,12 @@ struct array_pair
 #define iterate_synapses iterate_array_pair
 
 
-void recursive(neurons_pair neurons_pair_instance,
-  synapse_pair synapse_pair_instance , int neuron ){
-	
+void recursive(neurons_pair * neurons_pair_instance,
+  synapse_pair * synapse_pair_instance , int neuron ){
 	iterate_array_pair(synapse_pair_instance ,
 	  get_next(neurons_pair_instance , neuron)){
-		
+
 	}
+	recursive( neurons_pair_instance , synapse_pair_instance , neuron+1 );
 
 }

@@ -7,49 +7,33 @@ int main(int argc, char const *argv[])
 	neurons::net Net = neurons::net();
 	std::vector<double> resoult;
 	
-	for (int i =0 ; i < 3;i++){
-		Net.feed();
-		Net.calculate();
-		resoult = Net.harvest();
-		for (std::vector<double>::iterator i = resoult.begin(); i != resoult.end(); ++i)
-		{
-			printf("%f \n", *i ); 
-		}
-		Net.clean();
+	std::vector<double> sample_in {0.1 , 0.2 , 0.1 , 0.5 , 0.6 ,
+									0.7 , 0.1 , 0.4 , 0.3 , 0.1};
+	std::vector<double> sample_out {0.1 , 0.6 , 0.1 , 0.5 , 0.6 ,
+									0.7 , 0.1 , 0.4 , 0.3 , 0.1};
+
+	Net << &sample_in;
+	Net.calculate();
+	resoult = Net.harvest();
+	
+	for (std::vector<double>::iterator i = resoult.begin(); i != resoult.end(); ++i)
+	{
+		printf("%f \n", *i ); 
 	}
-	std::vector<double> sample_in (1 ,0.1);
-	std::vector<double> sample_out (1, 0.2);
-	for (int j = 0 ; j < 40 ; j++){
-		Net.backpropagation(&sample_in , &sample_out);
-		Net.clean();
-		Net.feed(&sample_in);
-		Net.calculate();
-		resoult = Net.harvest();
+	
+	printf("\n\n");
 
-		for (std::vector<double>::iterator i = resoult.begin(); i != resoult.end(); ++i)
-		{
-			std::cout << *i	<< " ,";
-		}
+	Net.train(&sample_in , &sample_out);
 
-		Net.clean();
-		std::cout << "\n";
+	Net << &sample_in;
+	Net.calculate();
+	resoult = Net.harvest();
+	
+
+	for (std::vector<double>::iterator i = resoult.begin(); i != resoult.end(); ++i)
+	{
+		printf("%f \n", *i );
 	}
-
-	/*	
-	std::list<int> mylist; 
-
-	mylist.push_back(1);
-
-	for (std::list<int>::iterator it = mylist.begin();
-	 it != mylist.end(); 
-		++it ){
-		std::cout << *it << std::endl;
-	}
-	for (std::list<int>::iterator it = mylist.begin();
-	 it != mylist.end(); 
-		++it ){
-		std::cout << *it << std::endl;
-	}
-	*/
+	Net.clean();
 	return 0;
 }

@@ -54,6 +54,8 @@ namespace neurons
 			void train(std::vector<double> *sample_in , std::vector<double> * sample_out);
 			net & operator<<( std::vector<double> * input);
 			net & operator>>( std::vector<double> * resoult);
+			double Rate;
+			void print();
 			//~net();
 	};
 
@@ -82,27 +84,19 @@ namespace neurons
 		 synapse_ptr->weight * synapse_ptr->in->value;
 	}
 
-	#define Rate -10
-
 	double costf(std::vector<double> * v , std::vector<double> * u);
-
-	class net_factory
+	
+	namespace net_factory
 	{
-		public:
-			net_factory();
-			net_factory(std::istream & is);
-			net * Net;
-			void encode(std::istream & is);
-			void decode(std::ostream & os);
-			//~net_factory();
-		
+		void encode(net * Net , std::iostream & os);
+		net * decode(std::istream & is);
 	};
-	class net_trainer
+	namespace net_trainer
 	{
-		public:
-			net_trainer();
-			net_trainer(net * Net);
-			net * Net;
+		class trainer{
+			public:
+				trainer();
+		};
 	};
 
 };

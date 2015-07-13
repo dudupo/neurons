@@ -5,6 +5,7 @@
 #include <map>
 #include "neurons.hpp"
 #include <stdio.h>
+#include <cstdlib>
 
 namespace neurons 
 {
@@ -47,6 +48,8 @@ namespace neurons
 	}
 	net::net(std::istream & is)
 	{
+		this->Rate = -10;
+
 		int number_of_layers , number_of_neurons  , number_of_synapses;
 		is >> number_of_layers  >> number_of_neurons >> number_of_synapses;
 		std::vector<neuron *> neurons;
@@ -144,7 +147,7 @@ namespace neurons
 				{
 					temp = map_deltas[(*iterator_synapses)->out->id];
 					temp_detla += temp * (*iterator_synapses)->weight;
-					(*iterator_synapses)->weight += (*iterator_neurons)->value * Rate *	temp;
+					(*iterator_synapses)->weight += (*iterator_neurons)->value * this->Rate *	temp;
 				}
 				temp_detla *= (*iterator_neurons)->dnormate();
 				map_deltas_current[(*iterator_neurons)->id] = temp_detla;
@@ -176,6 +179,21 @@ namespace neurons
 			}	
 		}
 		return map_deltas_current;
+	}
+	void net::print()
+	{
+		char buffer[50];
+		open_flow(this , iterator_layer){
+			for_each_neuron_in_layer((*iterator_layer) , iterator_neurons){
+				for_each_synapse_in_neuron((*iterator_neurons) , iterator_synapses){
+					std::sprintf(buffer , "echo -e '\e[38;5;%im%i \e[39m\e[49m: \e[38;5;%im%i \e[39m\e[49m-> %f'" ,
+					 18 +((*iterator_neurons)->id 		%240) ,(*iterator_neurons)->id,
+					 18 +((*iterator_synapses)->out->id %240) ,(*iterator_synapses)->out->id,
+					  (*iterator_synapses)->weight);
+					std::system(buffer) ;
+				}
+			}
+		}
 	}
 	void net::backpropagation(std::vector<double> * sample_in , std::vector<double> * sample_out){
 		this->feed( sample_in );
@@ -222,28 +240,36 @@ namespace neurons
 		*resoult = this->harvest();
 		return *this;
 	}
-	net_factory::net_factory() : net_factory(std::cin)
+	namespace net_factory
+	{
+		net * decode(std::istream & is)
+		{
+			net * Net = new net(is);
+			open_flow(Net , iterator_layer){
+				for_each_neuron_in_layer((*iterator_layer) , iterator_neurons){
+					is >> (*iterator_neurons)->value;
+					for_each_synapse_in_neuron((*iterator_neurons) , iterator_synapses){
+						is >> (*iterator_synapses)->weight;
+					}
+				}
+			}
+			return Net;
+		}
+		void encode(net * Net , std::iostream & os)
+		{
+			open_flow(Net , iterator_layer){
+				for_each_neuron_in_layer((*iterator_layer) , iterator_neurons){
+					os << (*iterator_neurons)->value << " ";
+					for_each_synapse_in_neuron((*iterator_neurons) , iterator_synapses){
+						os << (*iterator_synapses)->weight << " ";
+					}
+				}
+			}
+		}
+	};
+	namespace net_trainer
 	{
 
-	}
-	net_factory::net_factory(std::istream & is)
-	{
 
-	}
-	void net_factory::encode(std::istream & is)
-	{
-
-	}
-	void net_factory::decode(std::ostream & os)
-	{
-
-	}
-	net_trainer::net_trainer()
-	{
-
-	}
-	net_trainer::net_trainer(net * Net)
-	{
-
-	}
+	};
 };

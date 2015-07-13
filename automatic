@@ -29,3 +29,10 @@ then
 ./bin/maincpp.out < ./data/datainput
 exit 1
 fi
+
+if [ "$1" == "librarycpp" ]
+then 
+sudo cp ./cppcode/neurons.cpp /usr/include/c++/5.1.1/neurons.cpp
+sudo cp ./cppcode/neurons.hpp /usr/include/c++/5.1.1/neurons.hpp
+exit 1
+fi 

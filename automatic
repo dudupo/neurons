@@ -43,6 +43,6 @@ git add --all
 echo -e "\e[38;5;27m>$0 :\e[38;5;7m enter message"
 read message
 git commit -m "$message"
-sudo git push https://github.com/dudupo/neurons.git master
+sudo git push --author=<dudupo51@gmail.com> https://github.com/dudupo/neurons.git master
 exit 1
 fi 

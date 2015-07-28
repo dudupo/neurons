@@ -1,19 +1,5 @@
-
-
 from random import random
 from math import log , e
-
-'''
-				strategys
-			|--------------
-	states	|
-			|
-			|
-		
-			P*(q , s) = P(q , s) + h(q , s)
-			Sum(P(q,s)) + Sum(h(q ,s)) = 1 | for s in S 
-
-'''
 		
 class Neurones():
 

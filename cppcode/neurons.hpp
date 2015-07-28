@@ -77,6 +77,10 @@ namespace neurons
 		 Net->layers.begin(); \
 			iterator_layers != Net->layers.end() ; \
 			 ++iterator_layers)
+	#define iterate_vectors(type , vector1 , vector2 , it , ij) \
+		for (std::vector<type>::iterator it = vector1.begin(), \
+			ij = vector2.begin(); \
+			it != vector1.end(); ++it, ++ij)
 
 	void inline send_sign(synapse * synapse_ptr)
 	{
@@ -90,12 +94,22 @@ namespace neurons
 	{
 		void encode(net * Net , std::iostream & os);
 		net * decode(std::istream & is);
+		net * make_simple_net(std::iostream & is , int layers , int neurons_in_layer);
 	};
 	namespace net_trainer
 	{
 		class trainer{
 			public:
-				trainer();
+				trainer(net * Net);
+				net * Net;
+				std::vector<std::vector<double>>input_samples;
+				std::vector<std::vector<double>>output_samples;
+				void insert_sample(std::vector<double> & input,
+				 std::vector<double> & output);
+				void train();
+				double sumeror = 0.000000001;
+				double eps     = 0.001;
+
 		};
 	};
 

@@ -2,15 +2,22 @@
 #include "neurons.cpp"
 #include <fstream>
 
-
 int main(int argc, char const *argv[])
 {
 	//neurons::net_factory nf = neurons::net_factory();
+	//std::fstream is ("./data/datainput" , std::iostream::in | 
+	//	std::iostream::out | std::iostream::app );
+	//neurons::net Net = *neurons::net_factory::decode(is);
+	//Net.print();
+	
+	std::fstream is ("./data/datainput2" , std::iostream::in | 
+		std::iostream::out | std::iostream::app );
+	neurons::net Net = *neurons::net_factory::make_simple_net(is , 3 , 10);
+	/*
 	std::fstream is ("./data/datainput" , std::iostream::in | 
 		std::iostream::out | std::iostream::app );
-	neurons::net Net = *neurons::net_factory::decode(is);
-	//Net.print();
-
+	neurons::net Net ( is );
+	*/
 	std::fstream istrain ("./data/data-train");
 	std::fstream isquery ("./data/data-query"); 
 
@@ -18,13 +25,16 @@ int main(int argc, char const *argv[])
 	std::vector<double> input;		//values for feeding the input neurons.
 	std::vector<double> output;		//the output values of the last layer.
 	
+
+	neurons::net_trainer::trainer Trainer ( &Net );
+
 	int outlength =  Net.layers.back()->neurons.size();
 	int inlength  =  Net.layers.front()->neurons.size(); 
 	int train_cases;
 	int query_cases;
 	istrain >> train_cases;
 	isquery >> query_cases;
-	
+
 	double inpd;
 	//@io-function, receiving training program. 
 	for (int i = 0 ; i < train_cases ; i++)
@@ -39,10 +49,13 @@ int main(int argc, char const *argv[])
 			istrain >> inpd;
 			output.push_back(inpd);
 		}
-		Net.train(&input , &output);
+		Trainer.insert_sample(input , output);
+		//Net.train(&input , &output);
 		input.clear();
 		output.clear();
 	}
+	Trainer.train();
+	//std::system("echo 'hi'");
 	//@user-interface, output formate. 
 	char buffer[50];
 	for (int k = 0 ; k < outlength ; k++)
@@ -50,6 +63,7 @@ int main(int argc, char const *argv[])
 		std::sprintf(buffer , "echo -ne ' \e[38;5;27m%.5i\e[38;5;7m'" ,k);
 		std::system(buffer);
 	}
+
 	std::system("echo ''");
 	//@io-function, receiving querys. 
 	for (int i =0 ; i < query_cases ; i++)
@@ -100,6 +114,6 @@ int main(int argc, char const *argv[])
 	}
 	Net.clean();
 	*/
-	neurons::net_factory::encode(&Net , is );
+	//neurons::net_factory::encode(&Net , is );
 	return 0;
 }

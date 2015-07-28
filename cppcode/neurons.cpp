@@ -6,6 +6,7 @@
 #include "neurons.hpp"
 #include <stdio.h>
 #include <cstdlib>
+#include <random>
 
 namespace neurons 
 {
@@ -30,7 +31,7 @@ namespace neurons
 	{
 		this->in =  in;
 		this->out = out;
-		this->weight = 0.5;
+		this->weight = 0.3;
 	}
 	synapse::synapse(neuron * in , neuron * out , double weight)
 	{
@@ -49,6 +50,9 @@ namespace neurons
 	net::net(std::istream & is)
 	{
 		this->Rate = -10;
+
+		std::default_random_engine generator;
+		std::uniform_real_distribution<double> distribution(0.0,1.0);
 
 		int number_of_layers , number_of_neurons  , number_of_synapses;
 		is >> number_of_layers  >> number_of_neurons >> number_of_synapses;
@@ -71,6 +75,7 @@ namespace neurons
 		{
 			is >> I >> J;
 			neurons[I]->synapses.push_back( new synapse(neurons[I] , neurons[J]));
+			neurons[I]->synapses.back()->weight = distribution(generator);
 		}
 	}
 	void net::calculate_layer(layer * layer_ptr){
@@ -131,7 +136,7 @@ namespace neurons
 		
 		std::map<int, double> map_deltas_current;
 
-		if (iterator_layer != end && iterator_layer + 1 != end)
+		if (iterator_layer+1 != end)
 		{	
 			
 			this->calculate_layer( *iterator_layer );
@@ -139,21 +144,22 @@ namespace neurons
 			std::map<int, double> map_deltas =
 			 this->backpropagation(iterator_layer+1 , end , sample);
 			
-			double temp_detla = 0 , temp; 
+			double temp_detla = 0.0 , temp; 
 			for_each_neuron_in_layer((*iterator_layer) , iterator_neurons)
 			{
-				temp_detla = 0;
+				temp_detla = 0.0;
 				for_each_synapse_in_neuron((*iterator_neurons) , iterator_synapses)
 				{
 					temp = map_deltas[(*iterator_synapses)->out->id];
 					temp_detla += temp * (*iterator_synapses)->weight;
-					(*iterator_synapses)->weight += (*iterator_neurons)->value * this->Rate *	temp;
+					(*iterator_synapses)->weight +=
+					 (*iterator_neurons)->value * this->Rate *	temp;
 				}
 				temp_detla *= (*iterator_neurons)->dnormate();
 				map_deltas_current[(*iterator_neurons)->id] = temp_detla;
 			}
 		}
-		else if (iterator_layer != end){
+		else if (iterator_layer+1 == end){
 			
 			std::vector<double>::iterator iterator_sample = sample->begin();
 			for_each_neuron_in_layer((*iterator_layer) , iterator_neurons)
@@ -221,7 +227,7 @@ namespace neurons
 	}
 	double costf(std::vector<double> * v , std::vector<double> * u)
 	{
-		double cost = 0;
+		double cost = 0.0;
 		std::vector<double>::iterator j = u->begin();
 		for (std::vector<double>::iterator i = v->begin(); i != v->end(); ++i){
 			cost += std::pow((*i) - (*j),2);
@@ -255,7 +261,7 @@ namespace neurons
 			}
 			return Net;
 		}
-		void encode(net * Net , std::iostream & os)
+		void encode(net * Net, std::iostream & os)
 		{
 			open_flow(Net , iterator_layer){
 				for_each_neuron_in_layer((*iterator_layer) , iterator_neurons){
@@ -266,10 +272,83 @@ namespace neurons
 				}
 			}
 		}
+		net * make_simple_net(std::iostream & is , int layers,
+		 int neurons_in_layer)
+		{
+			int temp = std::pow(neurons_in_layer,2);
+			int synapses = temp * (layers-1);
+			
+			is << layers << " " << (neurons_in_layer * layers) <<
+			 " " << synapses << std::endl;
+			
+			for (int i = 0 ; i < layers ;i++){
+				for (int j = 0 ; j < neurons_in_layer ;j++){
+
+					is << (i*neurons_in_layer + j) <<
+					 " " << i << std::endl;
+				}
+			}
+			for (int i = 0; i< layers - 1 ; i++){
+				for (int j = 0 ; j < neurons_in_layer; j++){
+					for (int k = 0 ; k < neurons_in_layer ;k++){
+
+						is << ((i*neurons_in_layer) + j) << " " << 
+						 (((i+1) *neurons_in_layer) + k) << std::endl;
+					}
+				}
+			}
+			is.seekg(0 , is.beg);
+			return new net(is);
+		}
 	};
 	namespace net_trainer
 	{
+		trainer::trainer(net * Net)
+		{
+			this->Net = Net;
+		}
+		void trainer::insert_sample(std::vector<double> & input,
+		 std::vector<double> & output)
+		{
+			this->input_samples.push_back(input);
+			this->output_samples.push_back(output);
+		}
+		void trainer::train()
+		{
+			this->Net->Rate = -10;
+			double eror = 0 , temperor = 0;
+			this->Net->clean();
+			std::vector<double> resoult;
+			do {
+				eror = 0;
 
-
+				iterate_vectors(std::vector<double>,
+				 this->input_samples, this->output_samples , it , ij)
+				{
+					do {
+						this->Net->backpropagation(&(*it) , &(*ij));
+						this->Net->clean();
+						this->Net->feed(&(*it));
+						this->Net->calculate();
+						resoult  = this->Net->harvest();
+						temperor = costf(&resoult , &(*ij));
+						this->Net->clean();
+					} while (temperor > this->eps );
+				}
+				iterate_vectors(std::vector<double>,
+				 this->input_samples, this->output_samples , it , ij)
+				{
+					this->Net->feed( &(*it));
+					this->Net->calculate();
+					resoult = this->Net->harvest();
+					eror += costf(&resoult , &(*ij));
+					this->Net->clean();
+				}
+				//eror /= this->input_samples.size();
+				char buffer[50];
+				sprintf(buffer , "echo '%1.10f'" ,eror);
+				std::system(buffer);
+			} while ( eror > this->sumeror);
+		}
 	};
 };

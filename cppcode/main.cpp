@@ -2,7 +2,7 @@
 #include "neurons.cpp"
 #include <fstream>
 
-int main(int argc, char const *argv[])
+void debug()
 {
 	//neurons::net_factory nf = neurons::net_factory();
 	//std::fstream is ("./data/datainput" , std::iostream::in | 
@@ -115,5 +115,53 @@ int main(int argc, char const *argv[])
 	Net.clean();
 	*/
 	//neurons::net_factory::encode(&Net , is );
+}
+
+
+int main(int argc, char const *argv[])
+{
+	//debug();
+	
+	std::fstream is ("./data/data-zip-net/zip-net" , std::iostream::in | 
+		std::iostream::out | std::iostream::app );
+
+	neurons::net Net (is);
+
+	std::fstream istrain ("./data/data-zip-net/zip-query" ,std::iostream::in | 
+		std::iostream::out | std::iostream::app);
+	
+	neurons::net_trainer::trainer Trainer ( &Net );
+
+	std::vector<double> sample_in;
+	std::vector<double> sample_out;
+
+	int inp , len , range;
+	istrain >> range >> len;
+	for(int i = 0 ; i < len; i++)
+	{
+	   	istrain >> inp;
+	   	sample_in.push_back((double)i/ len);
+	   	sample_out.push_back((double)inp/range);
+	   	Trainer.insert_sample(sample_in , sample_out);
+		sample_in.clear();
+		sample_out.clear();
+	}
+	Trainer.train();
+	for (int i = 0; i < len; i++)
+	{
+		sample_in.push_back((double) i /len );
+		Net << &sample_in;
+		Net.calculate();
+		Net >> &sample_out;
+		
+		double temp = (sample_out.front() * range);
+		printf("%1.0f ", temp);
+		
+		sample_in.clear();
+		sample_out.clear();
+		Net.clean();
+	}
+	printf("\n");
+	
 	return 0;
 }

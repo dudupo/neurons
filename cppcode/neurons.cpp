@@ -144,7 +144,7 @@ namespace neurons
 			std::map<int, double> map_deltas =
 			 this->backpropagation(iterator_layer+1 , end , sample);
 			
-			double temp_detla = 0.0 , temp; 
+			double temp_detla = 0.0 , temp , diff; 
 			for_each_neuron_in_layer((*iterator_layer) , iterator_neurons)
 			{
 				temp_detla = 0.0;
@@ -152,8 +152,15 @@ namespace neurons
 				{
 					temp = map_deltas[(*iterator_synapses)->out->id];
 					temp_detla += temp * (*iterator_synapses)->weight;
-					(*iterator_synapses)->weight +=
-					 (*iterator_neurons)->value * this->Rate *	temp;
+					
+					// w(n+1) = dw(n+1) + mommentum * dw(n)
+
+					diff = (*iterator_neurons)->value * this->Rate *	temp;
+					diff += (*iterator_synapses)->lastdiff *
+					 (*iterator_synapses)->mommentum;
+
+					(*iterator_synapses)->weight   += diff;
+					(*iterator_synapses)->candidate = diff;
 				}
 				temp_detla *= (*iterator_neurons)->dnormate();
 				map_deltas_current[(*iterator_neurons)->id] = temp_detla;
@@ -245,6 +252,16 @@ namespace neurons
 	{
 		*resoult = this->harvest();
 		return *this;
+	}
+	void net::mommentum_calculate()
+	{
+		open_flow(this , iterator_layer){
+			for_each_neuron_in_layer((*iterator_layer) , iterator_neurons){
+				for_each_synapse_in_neuron((*iterator_neurons) , iterator_synapses){
+					(*iterator_synapses)->lastdiff = (*iterator_synapses)->candidate;
+				}
+			}
+		}
 	}
 	namespace net_factory
 	{
@@ -344,6 +361,7 @@ namespace neurons
 					eror += costf(&resoult , &(*ij));
 					this->Net->clean();
 				}
+				this->Net->mommentum_calculate();
 				//eror /= this->input_samples.size();
 				char buffer[50];
 				sprintf(buffer , "echo '%1.10f'" ,eror);

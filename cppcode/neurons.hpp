@@ -20,6 +20,9 @@ namespace neurons
 	{
 		public:
 			double weight;
+			double lastdiff    = 0;
+			double candidate   = 0;
+			double mommentum   = 0.1;
 			neuron *in;
 			neuron *out;
 			synapse(neuron *in , neuron *out);
@@ -55,6 +58,8 @@ namespace neurons
 			net & operator<<( std::vector<double> * input);
 			net & operator>>( std::vector<double> * resoult);
 			double Rate;
+			void mommentum_calculate();
+
 			void print();
 			//~net();
 	};
@@ -109,7 +114,6 @@ namespace neurons
 				void train();
 				double sumeror = 0.000000001;
 				double eps     = 0.001;
-
 		};
 	};
 

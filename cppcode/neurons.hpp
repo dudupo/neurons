@@ -22,7 +22,7 @@ namespace neurons
 			double weight;
 			double lastdiff    = 0;
 			double candidate   = 0;
-			double mommentum   = 0.1;
+			double mommentum   = -0.9;
 			neuron *in;
 			neuron *out;
 			synapse(neuron *in , neuron *out);
@@ -112,7 +112,7 @@ namespace neurons
 				void insert_sample(std::vector<double> & input,
 				 std::vector<double> & output);
 				void train();
-				double sumeror = 0.000000001;
+				double sumeror = 0.00001;
 				double eps     = 0.001;
 		};
 	};

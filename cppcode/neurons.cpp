@@ -52,7 +52,7 @@ namespace neurons
 		this->Rate = -10;
 
 		std::default_random_engine generator;
-		std::uniform_real_distribution<double> distribution(0.0,1.0);
+		std::uniform_real_distribution<double> distribution(-1.0,1.0);
 
 		int number_of_layers , number_of_neurons  , number_of_synapses;
 		is >> number_of_layers  >> number_of_neurons >> number_of_synapses;
@@ -155,7 +155,7 @@ namespace neurons
 					
 					// w(n+1) = dw(n+1) + mommentum * dw(n)
 
-					diff = (*iterator_neurons)->value * this->Rate *	temp;
+					diff = (*iterator_neurons)->value * this->Rate * temp;
 					diff += (*iterator_synapses)->lastdiff *
 					 (*iterator_synapses)->mommentum;
 
@@ -334,14 +334,18 @@ namespace neurons
 		{
 			this->Net->Rate = -10;
 			double eror = 0 , temperor = 0;
+			int attempts = 0 , good_attempt = 1 , max_attempts = 30;
+
 			this->Net->clean();
 			std::vector<double> resoult;
 			do {
 				eror = 0;
+				good_attempt = 1;
 
 				iterate_vectors(std::vector<double>,
 				 this->input_samples, this->output_samples , it , ij)
 				{
+					attempts = 0;
 					do {
 						this->Net->backpropagation(&(*it) , &(*ij));
 						this->Net->clean();
@@ -350,7 +354,10 @@ namespace neurons
 						resoult  = this->Net->harvest();
 						temperor = costf(&resoult , &(*ij));
 						this->Net->clean();
-					} while (temperor > this->eps );
+						attempts++;
+					} while (temperor > this->eps && attempts < max_attempts);
+					if (attempts >= max_attempts)
+						good_attempt = 0;
 				}
 				iterate_vectors(std::vector<double>,
 				 this->input_samples, this->output_samples , it , ij)
@@ -361,7 +368,8 @@ namespace neurons
 					eror += costf(&resoult , &(*ij));
 					this->Net->clean();
 				}
-				this->Net->mommentum_calculate();
+				if (good_attempt)
+					this->Net->mommentum_calculate();
 				//eror /= this->input_samples.size();
 				char buffer[50];
 				sprintf(buffer , "echo '%1.10f'" ,eror);

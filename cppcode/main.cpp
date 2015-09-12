@@ -120,8 +120,8 @@ void debug()
 
 int main(int argc, char const *argv[])
 {
-	//debug();
-	
+	debug();
+	/*
 	std::fstream is ("./data/data-zip-net/zip-net" , std::iostream::in | 
 		std::iostream::out | std::iostream::app );
 
@@ -162,6 +162,7 @@ int main(int argc, char const *argv[])
 		Net.clean();
 	}
 	printf("\n");
+	*/
 	
 	return 0;
 }
